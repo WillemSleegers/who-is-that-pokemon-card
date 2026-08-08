@@ -15,6 +15,15 @@ const baseCard: GameCard = {
 }
 
 describe("buildHints", () => {
+  it("redacts the pokemon's name when it appears in the flavor text", () => {
+    const card: GameCard = {
+      ...baseCard,
+      flavorText: "Bulbasaur can be seen napping in bright sunlight.",
+    }
+    const hints = buildHints(card)
+    expect(hints[0].value).toBe("█████████ can be seen napping in bright sunlight.")
+  })
+
   it("starts with flavor text and ends with the card image", () => {
     const hints = buildHints(baseCard)
     expect(hints[0]).toEqual({ label: "Flavor text", value: baseCard.flavorText })

@@ -6,9 +6,18 @@ export interface Hint {
   isImage?: boolean
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+export function redactPokemonName(text: string, name: string): string {
+  const pattern = new RegExp(`\\b${escapeRegExp(name)}\\b`, "gi")
+  return text.replace(pattern, (match) => "█".repeat(match.length))
+}
+
 export function buildHints(card: GameCard): Hint[] {
   const hints: Hint[] = [
-    { label: "Flavor text", value: card.flavorText },
+    { label: "Flavor text", value: redactPokemonName(card.flavorText, card.name) },
     { label: "Genus", value: card.genus },
   ]
 
