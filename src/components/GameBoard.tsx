@@ -3,7 +3,7 @@ import { useMemo, useRef, useState } from "react"
 import cardsData from "@/data/cards.json"
 import type { GameCard } from "@/types/card"
 import { createDeck } from "@/lib/deck"
-import { buildHints, type Hint } from "@/lib/hints"
+import { buildHints, type Hint, type HintKind } from "@/lib/hints"
 import { scoreForGuess } from "@/lib/scoring"
 import { isCorrectGuess } from "@/lib/matching"
 
@@ -22,13 +22,17 @@ interface Round {
   hintsRevealed: number
 }
 
-function newRound(card: GameCard): Round {
-  return { card, hints: buildHints(card), hintsRevealed: 1 }
+interface GameBoardProps {
+  enabledHints: Set<HintKind>
 }
 
-export function GameBoard() {
+export function GameBoard({ enabledHints }: GameBoardProps) {
   const deckRef = useRef(createDeck(cards))
   const names = useMemo(() => [...cards.map((c) => c.name)].sort(), [])
+
+  function newRound(card: GameCard): Round {
+    return { card, hints: buildHints(card, enabledHints), hintsRevealed: 1 }
+  }
 
   const [round, setRound] = useState<Round>(() => newRound(deckRef.current.next()))
   const [status, setStatus] = useState<"guessing" | "solved" | "given-up">("guessing")
