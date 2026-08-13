@@ -30,7 +30,10 @@ function escapeRegExp(value: string): string {
 }
 
 export function redactPokemonName(text: string, name: string): string {
-  const pattern = new RegExp(`\\b${escapeRegExp(name)}\\b`, "gi")
+  const pattern = new RegExp(
+    `(?<![\\p{L}\\p{N}])${escapeRegExp(name)}(?![\\p{L}\\p{N}])`,
+    "giu"
+  )
   return text.replace(pattern, (match) => "█".repeat(match.length))
 }
 

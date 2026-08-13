@@ -24,6 +24,16 @@ describe("buildHints", () => {
     expect(hints[0].value).toBe("█████████ can be seen napping in bright sunlight.")
   })
 
+  it("redacts names containing accented characters", () => {
+    const card: GameCard = {
+      ...baseCard,
+      name: "Flabébé",
+      flavorText: "Flabébé always keeps its flower fresh.",
+    }
+    const hints = buildHints(card)
+    expect(hints[0].value).toBe("███████ always keeps its flower fresh.")
+  })
+
   it("starts with flavor text and ends with the card image", () => {
     const hints = buildHints(baseCard)
     expect(hints[0]).toEqual({ label: "Flavor text", value: baseCard.flavorText })
