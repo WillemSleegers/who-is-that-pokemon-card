@@ -23,7 +23,7 @@ export function StartScreen({ eraGroups, onStart }: StartScreenProps) {
     () => new Set(HINT_KINDS.map((h) => h.kind))
   )
   const [selectedSets, setSelectedSets] = useState<Set<string>>(
-    () => new Set(eraGroups.flatMap((g) => g.sets.map((s) => s.code)))
+    () => new Set(eraGroups[0]?.sets.map((s) => s.code) ?? [])
   )
 
   function toggleHint(kind: HintKind, checked: boolean) {

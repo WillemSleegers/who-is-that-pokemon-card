@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+
 import type { GameCard } from "@/types/card"
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,6 +12,18 @@ interface RevealCardProps {
 }
 
 export function RevealCard({ card, points, onNext }: RevealCardProps) {
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Enter") {
+        event.preventDefault()
+        onNext()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [onNext])
+
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-3 text-center">
@@ -21,7 +35,7 @@ export function RevealCard({ card, points, onNext }: RevealCardProps) {
       </CardContent>
       <CardFooter className="justify-center">
         <Button className="w-full" onClick={onNext}>
-          Next card
+          Next card <span className="opacity-70">(Enter)</span>
         </Button>
       </CardFooter>
     </Card>

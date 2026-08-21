@@ -8,7 +8,7 @@ interface HintButtonProps {
 export function HintButton({ onReveal, disabled }: HintButtonProps) {
   return (
     <Button variant="secondary" className="w-full" onClick={onReveal} disabled={disabled}>
-      Reveal next hint
+      Reveal next hint <span className="text-muted-foreground">(Shift+Enter)</span>
     </Button>
   )
 }

@@ -21,7 +21,11 @@ function App() {
   return (
     <main className="min-h-svh bg-background">
       {config ? (
-        <GameBoard enabledHints={config.enabledHints} selectedSets={config.selectedSets} />
+        <GameBoard
+          enabledHints={config.enabledHints}
+          selectedSets={config.selectedSets}
+          onExit={() => setConfig(null)}
+        />
       ) : (
         <StartScreen
           eraGroups={eraGroups}

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import cardsData from "@/data/cards.json"
 import type { GameCard } from "@/types/card"
@@ -25,9 +25,10 @@ interface Round {
 interface GameBoardProps {
   enabledHints: Set<HintKind>
   selectedSets: Set<string>
+  onExit: () => void
 }
 
-export function GameBoard({ enabledHints, selectedSets }: GameBoardProps) {
+export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps) {
   const pool = useMemo(() => cards.filter((c) => selectedSets.has(c.set)), [selectedSets])
   const deckRef = useRef(createDeck(pool))
   const names = useMemo(() => [...new Set(cards.map((c) => c.name))].sort(), [])
@@ -43,6 +44,32 @@ export function GameBoard({ enabledHints, selectedSets }: GameBoardProps) {
   const [totalScore, setTotalScore] = useState(0)
 
   const allHintsRevealed = round.hintsRevealed >= round.hints.length
+
+  useEffect(() => {
+    if (status !== "guessing") return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Enter" && event.shiftKey) {
+        if (!allHintsRevealed) {
+          event.preventDefault()
+          handleRevealHint()
+        }
+        return
+      }
+
+      const target = event.target as HTMLElement | null
+      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA"
+      if (isTyping) return
+
+      if (event.key.toLowerCase() === "g" && allHintsRevealed) {
+        event.preventDefault()
+        handleGiveUp()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [status, allHintsRevealed])
 
   function handleGuess(name: string) {
     if (isCorrectGuess(name, round.card.name)) {
@@ -78,7 +105,7 @@ export function GameBoard({ enabledHints, selectedSets }: GameBoardProps) {
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-4 p-4">
-      <ScoreBar totalScore={totalScore} />
+      <ScoreBar totalScore={totalScore} onExit={onExit} />
 
       {status === "guessing" ? (
         <>
@@ -88,7 +115,7 @@ export function GameBoard({ enabledHints, selectedSets }: GameBoardProps) {
           <HintButton onReveal={handleRevealHint} disabled={allHintsRevealed} />
           {allHintsRevealed && (
             <Button variant="ghost" className="w-full" onClick={handleGiveUp}>
-              Give up / reveal answer
+              Give up / reveal answer <span className="text-muted-foreground">(G)</span>
             </Button>
           )}
         </>

@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 import { SearchIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -17,6 +17,10 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const listboxId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [])
 
   const suggestions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -48,9 +52,13 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
         setIsOpen(true)
         setHighlightedIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length)
       }
+    } else if (event.key === "Enter" && event.shiftKey) {
+      // Let this bubble up so the global "reveal hint" shortcut can handle it.
+      return
     } else if (event.key === "Enter") {
       event.preventDefault()
-      if (isDropdownOpen && suggestions[highlightedIndex]) {
+      event.stopPropagation()
+      if (suggestions[highlightedIndex]) {
         submitGuess(suggestions[highlightedIndex])
       } else if (query.trim()) {
         submitGuess(query.trim())
