@@ -16,11 +16,10 @@ const setFiles = readdirSync(SOURCE_SETS_DIR)
   .filter((f) => f.endsWith(".json"))
   .sort()
 
-const seen = new Set()
 const cards = []
 
 for (const file of setFiles) {
-  const { cards: setCards } = JSON.parse(
+  const { set, cards: setCards } = JSON.parse(
     readFileSync(path.join(SOURCE_SETS_DIR, file), "utf8"),
   )
 
@@ -28,8 +27,6 @@ for (const file of setFiles) {
     if (card.supertype !== "Pokémon" || !card.flavorText || !card.pokedex) {
       continue
     }
-    if (seen.has(card.name)) continue
-    seen.add(card.name)
 
     cards.push({
       name: card.name,
@@ -41,6 +38,10 @@ for (const file of setFiles) {
       attacks: (card.attacks ?? []).map((a) => ({ name: a.name })),
       abilities: (card.abilities ?? []).map((a) => ({ name: a.name })),
       image: card.images?.large ?? card.images?.small ?? "",
+      set: set.code,
+      setName: set.name,
+      era: set.series,
+      releaseDate: set.releaseDate ?? "",
     })
   }
 }

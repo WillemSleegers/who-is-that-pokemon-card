@@ -24,11 +24,13 @@ interface Round {
 
 interface GameBoardProps {
   enabledHints: Set<HintKind>
+  selectedSets: Set<string>
 }
 
-export function GameBoard({ enabledHints }: GameBoardProps) {
-  const deckRef = useRef(createDeck(cards))
-  const names = useMemo(() => [...cards.map((c) => c.name)].sort(), [])
+export function GameBoard({ enabledHints, selectedSets }: GameBoardProps) {
+  const pool = useMemo(() => cards.filter((c) => selectedSets.has(c.set)), [selectedSets])
+  const deckRef = useRef(createDeck(pool))
+  const names = useMemo(() => [...new Set(cards.map((c) => c.name))].sort(), [])
 
   function newRound(card: GameCard): Round {
     return { card, hints: buildHints(card, enabledHints), hintsRevealed: 1 }

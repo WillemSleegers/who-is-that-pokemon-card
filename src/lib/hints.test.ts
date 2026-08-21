@@ -12,6 +12,10 @@ const baseCard: GameCard = {
   attacks: [{ name: "Bind Down" }],
   abilities: [],
   image: "https://example.com/bulbasaur.png",
+  set: "BS",
+  setName: "Base Set",
+  era: "Base",
+  releaseDate: "1999-01-09",
 }
 
 describe("buildHints", () => {

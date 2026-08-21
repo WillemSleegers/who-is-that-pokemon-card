@@ -8,4 +8,8 @@ export interface GameCard {
   attacks: { name: string }[]
   abilities: { name: string }[]
   image: string
+  set: string
+  setName: string
+  era: string
+  releaseDate: string
 }

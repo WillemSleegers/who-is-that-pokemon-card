@@ -13,6 +13,10 @@ function fakeCard(name: string): GameCard {
     attacks: [],
     abilities: [],
     image: "",
+    set: "",
+    setName: "",
+    era: "",
+    releaseDate: "",
   }
 }
 
