@@ -57,13 +57,12 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
         return
       }
 
-      const target = event.target as HTMLElement | null
-      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA"
-      if (isTyping) return
-
-      if (event.key.toLowerCase() === "g" && allHintsRevealed) {
-        event.preventDefault()
-        handleGiveUp()
+      if (event.key.toLowerCase() === "g" && event.shiftKey) {
+        if (allHintsRevealed) {
+          event.preventDefault()
+          handleGiveUp()
+        }
+        return
       }
     }
 
@@ -115,7 +114,7 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
           <HintButton onReveal={handleRevealHint} disabled={allHintsRevealed} />
           {allHintsRevealed && (
             <Button variant="ghost" className="w-full" onClick={handleGiveUp}>
-              Give up / reveal answer <span className="text-muted-foreground">(G)</span>
+              Give up / reveal answer <span className="text-muted-foreground">(Shift+G)</span>
             </Button>
           )}
         </>

@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { HINT_KINDS, type HintKind } from "@/lib/hints"
 import type { EraGroup } from "@/lib/sets"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Button } from "@/components/ui/button"
 import {
@@ -74,6 +74,18 @@ export function StartScreen({ eraGroups, onStart }: StartScreenProps) {
 
   const canStart = enabledHints.size > 0 && selectedSets.size > 0
 
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Enter" && canStart) {
+        event.preventDefault()
+        onStart(enabledHints, selectedSets)
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [canStart, enabledHints, selectedSets, onStart])
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-4 pt-16 text-center">
       <div className="flex flex-col gap-2">
@@ -82,6 +94,14 @@ export function StartScreen({ eraGroups, onStart }: StartScreenProps) {
           Guess the Pokémon from its card, one hint at a time.
         </p>
       </div>
+
+      <Button
+        className="w-full"
+        disabled={!canStart}
+        onClick={() => onStart(enabledHints, selectedSets)}
+      >
+        Start <span className="opacity-70">(Enter)</span>
+      </Button>
 
       <Card className="text-left">
         <CardContent>
@@ -104,16 +124,15 @@ export function StartScreen({ eraGroups, onStart }: StartScreenProps) {
       </Card>
 
       <Card className="text-left">
-        <CardContent className="max-h-80 overflow-y-auto">
+        <CardContent className="max-h-80 overflow-y-auto pt-1">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <FieldLegend variant="label" className="mb-0">
               Sets to include
-            </p>
-            <div className="flex gap-1">
+            </FieldLegend>
+            <div className="flex gap-3">
               <Button variant="link" size="sm" className="h-auto p-0" onClick={selectAllSets}>
                 Select all
               </Button>
-              <span className="text-muted-foreground">·</span>
               <Button variant="link" size="sm" className="h-auto p-0" onClick={deselectAllSets}>
                 Deselect all
               </Button>
@@ -163,15 +182,6 @@ export function StartScreen({ eraGroups, onStart }: StartScreenProps) {
             })}
           </div>
         </CardContent>
-        <CardFooter className="justify-center">
-          <Button
-            className="w-full"
-            disabled={!canStart}
-            onClick={() => onStart(enabledHints, selectedSets)}
-          >
-            Start
-          </Button>
-        </CardFooter>
       </Card>
     </div>
   )

@@ -15,8 +15,10 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
   const [query, setQuery] = useState("")
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const [openUpward, setOpenUpward] = useState(false)
   const listboxId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -31,6 +33,15 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
   }, [names, query])
 
   const isDropdownOpen = isOpen && suggestions.length > 0
+
+  useEffect(() => {
+    if (!isDropdownOpen) return
+    const rect = containerRef.current?.getBoundingClientRect()
+    if (!rect) return
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    setOpenUpward(spaceBelow < 240 && spaceAbove > spaceBelow)
+  }, [isDropdownOpen])
 
   function submitGuess(name: string) {
     onGuess(name)
@@ -69,7 +80,7 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="relative flex items-center">
         <SearchIcon className="pointer-events-none absolute left-3 size-4 shrink-0 opacity-50" />
         <input
@@ -101,7 +112,11 @@ export function GuessInput({ names, onGuess, disabled }: GuessInputProps) {
         <ul
           id={listboxId}
           role="listbox"
-          className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-input bg-popover text-popover-foreground shadow-md"
+          className={cn(
+            "absolute z-10 w-full overflow-y-auto rounded-lg border border-input bg-popover text-popover-foreground shadow-md",
+            "max-h-60",
+            openUpward ? "bottom-full mb-1" : "top-full mt-1"
+          )}
         >
           {suggestions.map((name, index) => (
             <li key={name} role="option" aria-selected={index === highlightedIndex}>
