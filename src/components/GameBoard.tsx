@@ -42,6 +42,7 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
   const [feedback, setFeedback] = useState<string | null>(null)
   const [lastPoints, setLastPoints] = useState(0)
   const [totalScore, setTotalScore] = useState(0)
+  const [viewedIndex, setViewedIndex] = useState(0)
 
   const allHintsRevealed = round.hintsRevealed >= round.hints.length
 
@@ -64,11 +65,23 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
         }
         return
       }
+
+      if (event.key === "ArrowLeft" && event.shiftKey) {
+        event.preventDefault()
+        handlePreviousHint()
+        return
+      }
+
+      if (event.key === "ArrowRight" && event.shiftKey) {
+        event.preventDefault()
+        handleViewNextHint()
+        return
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [status, allHintsRevealed])
+  }, [status, allHintsRevealed, round.hintsRevealed, viewedIndex])
 
   function handleGuess(name: string) {
     if (isCorrectGuess(name, round.card.name)) {
@@ -83,11 +96,20 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
   }
 
   function handleRevealHint() {
-    setRound((prev) => ({
-      ...prev,
-      hintsRevealed: Math.min(prev.hintsRevealed + 1, prev.hints.length),
-    }))
+    setRound((prev) => {
+      const hintsRevealed = Math.min(prev.hintsRevealed + 1, prev.hints.length)
+      setViewedIndex(hintsRevealed - 1)
+      return { ...prev, hintsRevealed }
+    })
     setFeedback(null)
+  }
+
+  function handlePreviousHint() {
+    setViewedIndex((prev) => Math.max(prev - 1, 0))
+  }
+
+  function handleViewNextHint() {
+    setViewedIndex((prev) => Math.min(prev + 1, round.hintsRevealed - 1))
   }
 
   function handleGiveUp() {
@@ -100,16 +122,28 @@ export function GameBoard({ enabledHints, selectedSets, onExit }: GameBoardProps
     setRound(newRound(deckRef.current.next()))
     setStatus("guessing")
     setFeedback(null)
+    setViewedIndex(0)
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-4 p-4">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4 p-4 md:max-w-2xl">
       <ScoreBar totalScore={totalScore} onExit={onExit} />
 
       {status === "guessing" ? (
         <>
-          <HintPanel hints={round.hints} revealedCount={round.hintsRevealed} />
-          <GuessInput names={names} onGuess={handleGuess} />
+          <HintPanel
+            hints={round.hints}
+            revealedCount={round.hintsRevealed}
+            viewedIndex={viewedIndex}
+            onPrevious={handlePreviousHint}
+            onNext={handleViewNextHint}
+          />
+          <GuessInput
+            names={names}
+            onGuess={handleGuess}
+            isInvalid={feedback !== null}
+            onQueryChange={() => setFeedback(null)}
+          />
           {feedback && <p className="text-center text-sm text-destructive">{feedback}</p>}
           <HintButton onReveal={handleRevealHint} disabled={allHintsRevealed} />
           {allHintsRevealed && (
