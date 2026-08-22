@@ -38,7 +38,11 @@ export function groupSetsByEra(cards: GameCard[]): EraGroup[] {
     return group.sets.reduce((latest, s) => (s.releaseDate > latest ? s.releaseDate : latest), "")
   }
 
-  return groups.sort((a, b) => (latestReleaseDate(a) < latestReleaseDate(b) ? 1 : -1))
+  return groups.sort((a, b) => {
+    if (a.era === "Other") return 1
+    if (b.era === "Other") return -1
+    return latestReleaseDate(a) < latestReleaseDate(b) ? 1 : -1
+  })
 }
 
 export function allSetCodes(cards: GameCard[]): Set<string> {
